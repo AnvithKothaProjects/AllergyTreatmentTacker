@@ -74,6 +74,7 @@ function ImagePickerComponent ({navigation}) {
             <Button title={"Erase Storage"} onPress={() => {
                 AsyncStorage.clear()
             }}/>
+            
 
             <Text style={{textAlign: 'center', marginTop: 10, overflow: 'scroll', maxHeight: 200, maxWidth: width*.8}}>{text}</Text>
         </View>

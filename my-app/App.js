@@ -4,13 +4,16 @@ import callGoogleVision from './helper.js'
 import ImagePickerComponent from "./Components/ImagePickerComponent"
 import Plan from "./Components/Plan"
 import EditFood from "./Components/EditFood"
-import PlanPerDay from "./Components/PlanPerDay"
+import Tabs from "./Components/Tabs"
 import { NavigationContainer, StackActions, NavigationActions, Route, Router } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 import { LogBox } from 'react-native';
+import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs'
+
 
 export default function App() {
-  const Stack = createStackNavigator();
+  const Stack = createStackNavigator()
+  const Tab = createMaterialBottomTabNavigator()
   // LogBox.ignoreLogs(["Warning: ..."]); // Ignore log notification by message
 
   return (
@@ -23,7 +26,7 @@ export default function App() {
 
         <Stack.Screen name="EditPlan" component={EditFood} options={{headerShown: false}}/>
 
-        <Stack.Screen name="PlanPerDay" component={PlanPerDay} options={{headerShown: false}}/>
+        <Stack.Screen name="Tabs" component={Tabs} options={{headerShown: false}}/>
 
       </Stack.Navigator>
     </NavigationContainer>

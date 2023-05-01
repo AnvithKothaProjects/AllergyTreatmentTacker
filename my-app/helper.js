@@ -4,10 +4,29 @@ const API_KEY = 'AIzaSyDHli_4C3g1gibuZYZHctc5gqNrmkXdONg'
 const API_URL = `https://vision.googleapis.com/v1/images:annotate?key=${API_KEY}`
 
 const text = "Follow Up with Pulmonologist 12/5/19 Seed Allergy: Risk Fish Allergy: Low Risk Shellfish: Medium Risk No longer need to eat Recommended Foods, but still continue with wheat exposure Recommended Foods: (3-5 times per week): 1 apple, 1 pear, 1 stone fruit (peaches, apricots, cherries, nectarines, plums), 1 chickpeas (32-33 chickpeas or 2 tbsp hummus), 1 oz lentils, ½ tsp wheat germ Food Dosing Strategy: Pine nut /Brazil nut (challenge) then SLIT (3 yrs) then Macadamia (challenge) then dosing Denatured Camel Milk (micro + capped 45 ml) then Almond/Soy then Denatured Mare Milk (micro + capped 75 ml) then Hazelnut then Pistachio (micro + capped 4 g and inc Denatured Mare Milk to 160 ml staged) then Uncooked Camel Milk (micro + capped 60 ml) then Cashew (micro to clear) then Goat Yogurt (capped 60 ml) then Pecan (micro + capped 6 g) then Cow Yogurt then Uncooked Cow Milk then Walnut (clears Pecan) then Peanut then Seeds (if needed) and then Tolerance Visit 2 and then Remission Visit 1 and then Annual Remission Visits 12/8/20 FDS Update: 2g peanut protein challenge. The next cycle will build up from the last dose of peanut by 1/2 peanut perweek, until the patient reaches 11 peanuts. The next visit thereafter will be the 32-peanut challenge. 02/22/22 DAIRY FDS: Start at 3 oz and build up. Goal to challenge 10 g then stage down weekly. He would then stay on daily milk for another 2 months then return for that. - As tolerated: Brazil nut, Pine nut Maintenance Foods (in AM, minimum unless CAPPED): - ONCE DAILY: Greek yogurt (3 oz-capped). - WEEKLY: Macadamia (1), Almond (8), Soy (6 oz OR 1/2 tsp protein isolate), Hazelnut (4), Pistachio (6), Coconut (4 oz OR 1/4 tsp Nutiva), Cashew (5), Pecan halves (4), Walnut halves (5), Chestnut (1 tsp), Crab (1 oz cooked), Shrimp (1 oz cooked), Hen Egg (1 whole egg), Cooked Clam (1 oz cooked), Peanut (60) **CAPPED = set dose daily, no more or less.** nel bre MTNG MAN Treatment Foods: (dose in PM, at least 4 hours APART from maintenance, followed by 1 hour rest period - no exercise, showers, or sleeping) You must complete at least 7 days of your final week of dosing before coming back for challenge. Treatment food 1: Fairlife Milk (Fairlife Milk - 13g protein/80z) Week 1: Fairlife Milk 30 MI daily Week 2: Fairlife Milk 35 Ml daily Week 3: Fairlife Milk 45 MI daily Week 4: Fairlife Milk 60 Ml daily Week 5: Fairlife Milk 75 Ml daily Week 6: Fairlife Milk 90 MI daily Week 7: Fairlife Milk 110 MI daily Week 8: Fairlife Milk 130 Ml daily Week 9: Fairlife Milk 130 MI daily and continue this dose until next visit"
-const priorityList = ["Macadamia", "Macadamia Nut", "Almond", "Almond Nut", "Brazil Nut", "Brazil", "Cashew", "Cashew Nut",
-"Hazelnut", "Hazel Nut", "Hazel", "Pecan", "Pecan Nut", "Pine Nut", "Pine", "Pistachio", "Pistachio Nut", "Walnut", "Peanut", "Chestnut", "Chest nut", "Pili nut", "Pili", "Kola Nut",
-"Kola", "Kola Nut", "Coconut Milk", "Coconut", "Sunflower Seed", "Nut", "Camel Milk", "Mare Milk", "Goat Milk", "Sheep Milk", "Cow Milk", "Yogurt", "Milk", "Crab", "Shrimp",
-"Clam", "Apple", "Pear", "Chickpea", "Lentil", "Wheat Germ", "Wheat", "Egg", "Egg white"]
+// const priorityList = ["Macadamia", "Macadamia Nut", "Almond", "Almond Nut", "Brazil Nut", "Brazil", "Cashew", "Cashew Nut",
+// "Hazelnut", "Hazel Nut", "Hazel", "Pecan", "Pecan Nut", "Pine Nut", "Pine", "Pistachio", "Pistachio Nut", "Walnut", "Peanut", "Chestnut", "Chest nut", "Pili nut", "Pili", "Kola Nut",
+// "Kola", "Kola Nut", "Coconut Milk", "Coconut", "Sunflower Seed", "Nut", "Camel Milk", "Mare Milk", "Goat Milk", "Sheep Milk", "Cow Milk", "Yogurt", "Milk", "Crab", "Shrimp",
+// "Clam", "Apple", "Pear", "Chickpea", "Lentil", "Wheat Germ", "Wheat", "Egg", "Egg white"]
+
+const priorityList = {
+    Nuts: ["Macadamia", "Macadamia Nut", "Almond", "Almond Nut", "Brazil Nut", "Brazil", "Cashew", "Cashew Nut", 
+    "Hazelnut", "Hazel Nut", "Hazel", "Pecan", "Pecan Nut", "Pine Nut", "Pine", "Pistachio", "Pistachio Nut", "Walnut", 
+    "Peanut", "Chestnut", "Chest nut", "Pili nut", "Pili", "Kola Nut", "Coconut Milk", "Coconut", "Nut", "Coconut Milk"],
+
+    Dairy: ["Camel Milk", "Mare Milk", "Goat Milk", "Sheep Milk", "Cow Milk", "Yogurt", "Milk"],
+
+    Shellfish: ["Crab", "Shrimp", "Clam"],
+
+    Eggs: ["Egg", "Egg white"],
+
+    Wheat: ["Wheat Germ", "Wheat"],
+
+    Other: ["Macadamia", "Macadamia Nut", "Almond", "Almond Nut", "Brazil Nut", "Brazil", "Cashew", "Cashew Nut",
+    "Hazelnut", "Hazel Nut", "Hazel", "Pecan", "Pecan Nut", "Pine Nut", "Pine", "Pistachio", "Pistachio Nut", "Walnut", "Peanut", "Chestnut", "Chest nut", "Pili nut", "Pili", "Kola Nut",
+    "Kola", "Kola Nut", "Coconut Milk", "Coconut", "Sunflower Seed", "Nut", "Camel Milk", "Mare Milk", "Goat Milk", "Sheep Milk", "Cow Milk", "Yogurt", "Milk", "Crab", "Shrimp",
+    "Clam", "Apple", "Pear", "Chickpea", "Lentil", "Wheat Germ", "Wheat", "Egg", "Egg white"]
+}
 
 function generateBody(image) {
   const body = {
@@ -108,7 +127,8 @@ function processText(text) {
     for (let i=0; i<foodList.length; i++) {
         for (let j=0; j<foodList[i].length; j++) {
             info[i].push(new foodPlan())
-            info[i][info[i].length-1].food = foodList[i][j]
+            info[i][info[i].length-1].food = foodList[i][j][0]
+            info[i][info[i].length-1].foodType = foodList[i][j][1]
         }
     }
     
@@ -124,16 +144,27 @@ function generateList(start, startList, text) {
     }
     // console.log(text.substring(start, end+1))
     // console.log()
+    // var keys = Object.keys(priorityList)
+    // for (var key in keys) {
+    //     console.log(key)
+    // }
+
+    // for (const [key, value] of Object.entries(priorityList)) {
+    //     console.log(value.length)
+    // }
 
     for (let i=start; i<end; i++) {
-        for (let j=0; j<priorityList.length; j++) {
-            if (i + priorityList[j].length <= text.length && text.substring(i, i+priorityList[j].length).toLowerCase() == priorityList[j].toLowerCase()) {
-                if (isFirstTime(foodlist, priorityList[j])) foodlist.push(priorityList[j])
-                continue
+        loop1 : for (const [key, value] of Object.entries(priorityList)) {
+            let smallList = value
+            for (let j=0; j<smallList.length; j++) {
+                if (i + smallList[j].length <= text.length && text.substring(i, i+smallList[j].length).toLowerCase() == smallList[j].toLowerCase()) {
+                    if (isFirstTime(foodlist, smallList[j])) foodlist.push([smallList[j], key])
+                    break loop1
+                }
             }
-        }
+        }    
     }
-
+    
     return foodlist
 }
 

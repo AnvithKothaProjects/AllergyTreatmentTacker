@@ -33,76 +33,61 @@ function Plan ({ navigation, route }) {
     const notificationListener = useRef();
     const responseListener = useRef();
 
+    const options = {
+        method: 'GET',
+        headers: {
+            'X-RapidAPI-Key': '0ba1ae5cfamshee2f3634babfe03p1846bejsn0b1f0162d95e',
+            'X-RapidAPI-Host': 'amazon-price1.p.rapidapi.com'
+        }
+    };    
+
     async function schedulePushNotification() {
         await Notifications.cancelAllScheduledNotificationsAsync()
-        // await Notifications.scheduleNotificationAsync({
-        //   content: {
-        //     title: "You've got mail! 📬",
-        //     body: 'Here is the notification body',
-        //     data: { data: 'goes here' },
-        //   },
-        //   trigger: { seconds: 2 },
-        // });
+
         for (let i=0; i<info.length; i++) {
             for (let j=0; j<info[i].length; j++) {
                 var curr = info[i][j]
-                if (!curr.timeSpecified || curr.days.length == 0) continue
-                // console.log("New Food")
 
                 var newTime = new Date(date)
-                var foodTime = new Date(curr.time)
+                newTime.setHours(new Date(curr.time).getHours())
+                newTime.setMinutes(new Date(curr.time).getMinutes())
 
-                newTime.setHours(foodTime.getHours())
-                newTime.setMinutes(foodTime.getMinutes())
+                loop1 : for (let k=0; k<16; k++) {
+                    for (let day =0; day<7; day++) {
+                        var ind = k
 
-                for (let k=0; k<curr.dosingPerWeek.length; k++) {
-                    for (let day=0; day<7; day++) {
-                        let numberOfDays = 7*k + day
-                        
-                        let newDate = new Date(newTime.getTime() + 60*60*24*1000*numberOfDays)
-                        if (curr.days[newDate.getDay()]) {
-                            // console.log(newDate.getMonth(), newDate.getDate(), newDate.getHours(), newDate.getMinutes())
-                            let title = ""
-                            if (curr.units == "") title = "Eat " + curr.dosingPerWeek[k] + " " + curr.food
-                            else title = "Take " + curr.dosingPerWeek[k] + " " + curr.units + " of " + curr.food
-                            await Notifications.scheduleNotificationAsync({
-                              content: {
-                                title: title,
-                                body: '',
-                                data: { data: 'goes here' },
-                              },
-                              trigger: { seconds: (newDate.getTime() - (new Date()).getTime())/1000 },
-                            });
+                        if (k >= curr.dosingPerWeek.length) {
+                            if (!curr.dosingAfter) break loop1
+                            break
+
+                            ind = curr.dosingPerWeek.length-1
                         }
-                    }
-                }
 
-                if (!curr.dosingAfter) continue
-
-                for (let k=curr.dosingPerWeek.length; k<16; k++) {
-                    for (let day=0; day<7; day++) {
                         let numberOfDays = 7*k + day
-                        
                         let newDate = new Date(newTime.getTime() + 60*60*24*1000*numberOfDays)
-                        // console.log(newDate.getMonth(), newDate.getDate(), newDate.getHours(), newDate.getMinutes())
+
                         if (curr.days[newDate.getDay()]) {
-                            
                             let title = ""
-                            if (curr.units == "") title = "Eat " + curr.dosingPerWeek[curr.dosingPerWeek.length-1] + " " + curr.food
-                            else title = "Take " + curr.dosingPerWeek[curr.dosingPerWeek.length-1] + " " + curr.units + " of " + curr.food
+                            if (curr.units[ind] == "None" || curr.units[ind] == "") {
+                                title = "Take " + curr.dosingPerWeek[ind] + " " + curr.food
+                            } else {
+                                title = "Take " + curr.dosingPerWeek[ind] + " " + curr.units[ind] + " of " + curr.food
+                            }
+
                             await Notifications.scheduleNotificationAsync({
-                              content: {
-                                title: title,
-                                body: '',
-                                data: { data: 'goes here' },
-                              },
-                              trigger: { seconds: (newDate.getTime() - (new Date()).getTime())/1000 },
+                                content: {
+                                    title: title,
+                                    body: '',
+                                    data: { data: 'goes here' },
+                                },
+                                trigger: { seconds: (newDate.getTime() - (new Date()).getTime()) / 1000 },
                             });
                         }
                     }
                 }
             }
         }
+        
     }
 
     async function registerForPushNotificationsAsync() {
@@ -227,7 +212,7 @@ function Plan ({ navigation, route }) {
 
     async function store() {
         try {
-            // console.log(info)
+            console.log(new Date(date).getDate())
             await AsyncStorage.setItem("latestPlan", JSON.stringify({plan: info, date: date}))
         } catch (e) {
             console.log(e + "Store Error")
@@ -242,6 +227,8 @@ function Plan ({ navigation, route }) {
 
         try {
             var currDate = new Date(date)
+
+            //Clears all previous dates
             for (let i=0; i<200; i++) {
                 let newDate = new Date(currDate.getTime() + 60*60*24*1000*i)
                 let dateStr = newDate.getMonth() + "-" + newDate.getDate() + "-" + newDate.getFullYear()
@@ -250,8 +237,11 @@ function Plan ({ navigation, route }) {
                 if (index != -1) dates.splice(index)
             }
 
+            // console.log(new Date().getDate())
+
             for (let i=0; i<info.length; i++) {
                 for (let j=0; j<info[i].length; j++) {
+                    //Look at each food
                     var curr = info[i][j]
                     if (curr.dosingPerWeek.length == 0 || curr.days == [false, false, false, false, false, false, false]) continue
     
@@ -262,12 +252,17 @@ function Plan ({ navigation, route }) {
                             let numberOfDays = 7*k + day
                             
                             let newDate = new Date((new Date(date)).getTime() + 60*60*24*1000*numberOfDays)
+                            console.log(newDate.getDate())  
+                            
+                            // let myDate = new Date(new Date())
 
                             if (curr.days[newDate.getDay()]) {
+                                
                                 let dateStr = newDate.getMonth() + "-" + newDate.getDate() + "-" + newDate.getFullYear()
                                 let index = hasDate(dates, dateStr)
                                 if (index == -1) {
-                                    dates.push([dateStr, [[curr.food, false]], []])
+                                    // console.log(numberOfDays)
+                                    dates.push([dateStr, [[curr.food, false]]])
                                 } else {
                                     dates[index][1].push([curr.food, false])
                                 }
@@ -277,6 +272,7 @@ function Plan ({ navigation, route }) {
 
                 }
             }
+            console.log(dates)
 
             await AsyncStorage.setItem("dates", JSON.stringify(dates))
         } catch(e) {
@@ -291,6 +287,34 @@ function Plan ({ navigation, route }) {
         return -1
     }
 
+    function listOfTypes(foods) {
+        // console.log(foods)
+        var list = []
+
+        for (const food of foods) {
+            let works = true
+
+            for (const elem of list) {
+                if (food.foodType == elem) {
+                    works = false
+                    break
+                }
+            }
+
+            if (works) list.push(food.foodType);
+        }
+
+        for (let i=0; i<list.length; i++) {
+            if (list[i] == "Other") {
+                list.splice(i, 1)
+                list.push("Other")
+                break
+            }
+        }
+
+        return list
+    }
+
     async function retrieve() {
         try {
             const jsonValue = await AsyncStorage.getItem("latestPlan")
@@ -299,12 +323,31 @@ function Plan ({ navigation, route }) {
             } else {
                 const object = JSON.parse(jsonValue)
                 setInfo(object.plan)
-                setDate(new Date(object.date))
+                setDate(object.date)
                 // console.log(object.date)
             }
         } catch(e) {
             console.log(e + "Retrieve Error")
         }
+    }
+
+    function getMarginTop(index) {
+        if (index == 0) return height*.02
+        return 0
+    }
+
+    async function callApi() {
+        var list = []
+        for (let i=0; i<info[0].length; i++) {
+            let replace = info[0][i].food.replace(" ", "%20")
+
+            await fetch("https://amazon-price1.p.rapidapi.com/search?keywords=" + replace + "&marketplace=US", options)
+                .then(response => response.json())
+                .then(response => list.push(response))
+                .catch(err => console.error(err));
+        }
+
+        await AsyncStorage.setItem("api", JSON.stringify(list))
     }
 
     return (
@@ -314,8 +357,20 @@ function Plan ({ navigation, route }) {
                     <View style={styles.section}>
                         <Text style={styles.header}>{topics[bigInd]}</Text>
 
-                        {info[bigInd].map((elem, smallInd) => (
-                            <PlanEntry key={smallInd} text={elem.food} closeFunc={closeFunc} bigIndex={bigInd} littleIndex={smallInd} navFunc={navFunc} obj={info[bigInd][smallInd]}/>
+                        {/* {info[bigInd].map((elem, smallInd) => (
+                           <PlanEntry key={smallInd} text={elem.food} closeFunc={closeFunc} bigIndex={bigInd} littleIndex={smallInd} navFunc={navFunc} obj={info[bigInd][smallInd]}/>
+                        ))} */}
+
+                        {listOfTypes(info[bigInd]).map((foodType, typeInd) => (
+                            <View style={{marginLeft: width*.05, marginTop: getMarginTop(typeInd)}} key={typeInd}>
+                                <Text style={{fontSize: 25}}>{foodType}</Text>
+                                {info[bigInd].map((myFood, smallInd) => (
+                                    <View key={smallInd}>
+                                        {info[bigInd][smallInd].foodType == foodType && 
+                                        <PlanEntry key={smallInd} text={myFood.food} closeFunc={closeFunc} bigIndex={bigInd} littleIndex={smallInd} navFunc={navFunc} obj={info[bigInd][smallInd]}/>}
+                                    </View>
+                                ))}
+                            </View>
                         ))}
 
                         {addSection == bigInd && <View style={[styles.inputView]}>
@@ -331,6 +386,7 @@ function Plan ({ navigation, route }) {
                                 let newInfo = info
                                 newInfo[bigInd].push(new foodPlan())
                                 newInfo[bigInd][info[bigInd].length-1].food = currText
+                                newInfo[bigInd][info[bigInd].length-1].foodType = "Other"
                                 setInfo(newInfo)
                                 myBs()
                                 changeAdd(-1)
@@ -349,15 +405,26 @@ function Plan ({ navigation, route }) {
             
             <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
                 <Text style={{fontSize: 20}}>Start Date:  </Text>
-                <DateTimePicker value={new Date(date)} mode={'date'} onChange={(event, date) => setDate(date.getTime())} 
+                <DateTimePicker value={new Date(date)} mode={'date'} onChange={(event, date) => {
+                    setDate(date.getTime())
+                    console.log(new Date(date).getDate())
+                }} 
                 minimumDate={new Date()} maximumDate={new Date((new Date()).getTime() + 60*60*24*1000*30)}></DateTimePicker>
             </View>
-            <Button title='Done' onPress={async () => {
-                store()
-                await schedulePushNotification()
-                await makeDates()
-                navigation.navigate("PlanPerDay")
-            }}/>
+            <View style={{ marginBottom: height*.05 }}>
+                <Button title='Done' onPress={async () => {
+                    store()
+                    await schedulePushNotification()
+                    await makeDates()
+                    await callApi()
+                    navigation.navigate("Tabs")
+                    
+                }}/>
+            </View>
+            
+            {/* <Button title='Print' onPress={() => {
+                console.log(new Date(date).getDate())
+            }}/> */}
             
         </ScrollView>
     );

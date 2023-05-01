@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Device from 'expo-device';
 import Checkbox from 'expo-checkbox';
+import CalendarPicker from 'react-native-calendar-picker';
 
 function PlanPerDay({ navigation, route }) {
     const [date, setDate] = useState(new Date());
@@ -42,21 +43,58 @@ function PlanPerDay({ navigation, route }) {
         return -1
     }
 
+    function dateStyles(currDate) {
+        var str = "#969590"
+
+        let newDate = new Date(currDate)
+
+        let index = checkList(datePlan, createString(newDate))
+        if (index != -1 && datePlan[index][1].length != 0) {
+            var numFalse = 0;
+
+            for (let i=0; i<datePlan[index][1].length; i++) {
+                if (!datePlan[index][1][i][1]) numFalse++
+            }
+
+            if (numFalse == 0) str = "#4ca860" //green
+            else if (numFalse == datePlan[index][1].length) str = "#a84c4c" //red
+            else str = "#ccb95c"
+        }
+
+
+        if (createString(newDate) == createString(date)) return {
+            containerStyle: [],
+            style: {backgroundColor: str, borderWidth: 3},
+            textStyle: {color: 'black'},
+            allowDisabled: true
+        }
+
+        return {
+            containerStyle: [],
+            style: {backgroundColor: str},
+            textStyle: {color: 'black'},
+            allowDisabled: true
+        }
+    }
+
     return (
         <View>
+            
             <View style={{justifyContent: 'center', alignItems: 'center', marginTop: height*.06}}>
                 <Text style={{fontSize: 20, marginBottom: height*.03}}>Choose Day</Text>
-                <DateTimePicker value={date} mode={'date'}
-                onChange={(event, date) => {
-                    setDate(date)
-                    let str = createString(date)
+                <CalendarPicker
+                customDatesStyles={(date) => dateStyles(date)} onDateChange={(date) => {
+                    let newDate = new Date(date)
+
+                    setDate(newDate)
+                    let str = createString(newDate)
                     setIndex(checkList(datePlan, str))
                 }}/>
             </View>
             <ScrollView contentContainerStyle={{maxHeight: height*.5, alignItems: 'center', marginTop: height*.05}}>
                 {bigInd == -1 && <Text>Nothing for this date</Text>}
                 {bigInd != -1 && datePlan[bigInd][1].map((item, index) => (
-                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: height*.01 }}>
                         <Text style={{marginRight: width*.01}}>{item[0]}</Text>
                         <Checkbox value={datePlan[bigInd][1][index][1]} onValueChange={() => {
                             let newArr = datePlan

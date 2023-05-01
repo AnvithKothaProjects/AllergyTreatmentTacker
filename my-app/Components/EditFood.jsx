@@ -14,17 +14,19 @@ function EditFood({ navigation, route }) {
 
     const [food, setFood] = useState(obj.food)
     const [units, setUnits] = useState(obj.units)
-    const [perWeek, setWeeks] = useState(obj.dosingPerWeek)
+    const [perWeek, setPerWeek] = useState(obj.dosingPerWeek)
     const [keepGoing, setContinue] = useState(obj.dosingAfter)
     const [chosenDays, setDays] = useState(boolToNumArray(obj.days))
-    const [showTime, setShowTime] = useState(obj.timeSpecified)
     const [time, setTime] = useState(obj.time == null ? new Date() : new Date(obj.time))
+    const [weekInd, setWeek] = useState(obj.dosingPerWeek.length > 0 ? 0 : -1)
 
-    const [selectedFrequency, setFrequency] = useState(chosenDays.length == 7 ? "Daily" : "Other");
     const {height, width} = useWindowDimensions();
     const [bs, setBs] = useState("")
     const days = ["Sunday", "Monday", "Tuesday", "Wednesday   ", "Thursday", "Friday", "Saturday"]
     const [newVal, changeNewVal] = useState("")
+
+    // const [quantityBox, changeQuantity] = useState("")
+    // const [unitsBox, changeUnits] = useState("")
 
     function boolToNumArray(arr) {
         let newArr = []
@@ -44,8 +46,6 @@ function EditFood({ navigation, route }) {
         for (let i = 0; i < arr.length; i++) {
             newArr[parseInt(arr[i])] = true
         }
-
-        if (selectedFrequency == "Daily") newArr = [true, true, true, true, true, true, true]
 
         return newArr
     }
@@ -92,8 +92,8 @@ function EditFood({ navigation, route }) {
         newObj.dosingPerWeek = perWeek
         newObj.dosingAfter = keepGoing
         newObj.days = numArrayToBool(chosenDays)
-        newObj.timeSpecified = showTime
         newObj.time = time
+        newObj.foodType = obj.foodType
 
         // console.log(newObj.days)
 
@@ -104,54 +104,116 @@ function EditFood({ navigation, route }) {
         // console.log(chosenDays)
     }, [obj, bigInd, smallInd])
 
+    function giveWeekIndex() {
+        if (weekInd != -1) return weekInd
+        return 0
+    }
+
+    function pickerMargin() {
+        if (perWeek.length == 0) return -height*.1
+
+        var ind = weekInd == -1 ? 0 : weekInd
+
+        var numBelow = perWeek.length - ind - 1
+
+        if (numBelow == 0) {return -height*.08}
+        else if (numBelow == 1) {return -height*.04}
+        else if (numBelow == 2) {return 0}
+
+        return 0
+    }
+
     return (
         <ScrollView>   
 
-            <View style={{flexDirection: 'row'}}>
-                <View style={{marginTop: height*.09, flexDirection: 'row', alignItems: 'center', flex: 1.2, marginLeft: width*.04}}>
+            <View style={{flexDirection: 'row', justifyContent:'center'}}>
+                <View style={{marginTop: height*.09, flexDirection: 'row', alignItems: 'center', marginLeft: width*.04}}>
                     <Text>{bigInd == 3 ? "Medicine Name: " : "Food Name: "}</Text>
                     <TextInput style={{borderWidth: 1, borderRadius: 5, padding: height*.01}} placeholder={food == "" ? "Enter Food" : food} onChangeText={(val) => {
                         setFood(val)
                         myBs()
                     }}/>
                 </View>
-
-                <View style={{marginTop: height*.09, flexDirection: 'row', alignItems: 'center', flex: 1}}>
-                    <Text>Dose Units: </Text>
-                    <TextInput style={{borderWidth: 1, borderRadius: 5, padding: height*.01}} placeholder={units == "" ? "None" : units} onChangeText={(val) => {
-                        setUnits(val)
-                        myBs()
-                    }}/>
-                </View>
             </View>
 
-            <View style={{marginLeft: width*.04,  marginTop: height*.035, justifyContent: 'center'}}>
-                {perWeek.map((item, index) => (
-                    <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}} key={index}>
-                        <Text key={index} style={[{marginBottom: height*.02, fontSize: 20, paddingTop:height*.02}, {}]}>{"Week " + (index+1) + ": " + item + "  "}</Text>
-                        <Ionicons name='close' size={25} color='black' onPress={() => {
-                            let newArr = perWeek
-                            newArr.splice(index, 1)
-                            setWeeks(newArr)
+            <View style={{marginLeft: width*.04,  marginTop: height*.035, justifyContent: 'center', maxWidth: width*.9,}}>
+                <Text style={{ textAlign: 'center', fontSize: 25, marginBottom: perWeek.length == 0 ? height*.04 : -height*.05}}>{"Dosing per Week"}</Text>
+
+                {perWeek.length == 0 && <Text style={{ textAlign: 'center', fontSize: 15, marginBottom: -height*.1}}>{"No Weeks Yet"}</Text>}
+                <Picker style={{marginBottom: pickerMargin(), marginTop: (weekInd > 1 ? height*.03 : 0)}} selectedValue={weekInd} onValueChange={(itemVal, itemInd) => {
+                    setWeek(itemInd)
+                    myBs()
+                }}>
+                    {perWeek.map((elem, index) => (
+                        <Picker.Item label={"Week " + (index+1)} value={index} key={index}/>
+                    ))}
+                </Picker>
+
+                {perWeek.length > 0 && <View style={{ alignItems: 'center'}}>
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                        <Text>{"Dose Quantity: "}</Text>  
+                        <TextInput style={{borderWidth: 1, borderRadius: 5, padding: height*.006}} value={"" + perWeek[giveWeekIndex()]} onChangeText={(val) => {
+                            let arr = perWeek
+                            arr[giveWeekIndex()] = val
+                            setPerWeek(arr)
                             myBs()
                         }}/>
                     </View>
-                ))}
 
-                <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
-                    <Text style={{marginBottom: height*.01, fontSize: 20, paddingTop:height*.02}}>{"Week " + (perWeek.length+1) + ":  "}</Text>
-                    <TextInput style={{borderWidth: 1, borderRadius: 5, padding: height*.01, marginRight: width*.03}} placeholder="0" onChangeText={(val) => changeNewVal(val)}/>
-                    <Ionicons name='checkmark-outline' size={25} color='black' onPress={() => {
+                    <View style={{flexDirection: 'row', alignItems: 'center' }}>
+                        <Text>{"Dose Units: "}</Text>
+                        <TextInput style={{borderWidth: 1, borderRadius: 5, padding: height*.006}} placeholder={"" + units[giveWeekIndex()]} value={units[giveWeekIndex()]} onChangeText={(val) => {
+                            let arr = units
+
+                            let initInd = giveWeekIndex();
+                            let initVal = arr[initInd]
+
+                            for (let i=initInd; i<perWeek.length; i++) {
+                                if (arr[i] == initVal) arr[i] = val
+                                else break
+                            }
+
+                            setUnits(arr)
+                            myBs()
+                        }}/>
+                    </View>
+                </View>}
+
+                <View style={{flexDirection: 'row', justifyContent: 'center'}}>
+                    <Button title={"Add Week"} onPress={() => {
                         let newArr = perWeek
-                        newArr.push(newVal)
-                        setWeeks(newArr)
+                        if (newArr.length > 0) newArr.push(newArr[newArr.length-1])
+                        else newArr.push(0)
+                        setPerWeek(newArr)
+
+                        let arr = units
+                        if (arr.length > 0) arr.push(arr[arr.length-1])
+                        else arr.push("None")
+                        setUnits(arr)
+
                         myBs()
+                    }}/>
+                    <Button title={"Remove Week"} onPress={() => {
+                        let arr = perWeek
+                        if (arr.length > 0) arr.splice(arr.length-1, 1)
+                        setPerWeek(arr)
+
+                        arr = units
+                        if (arr.length > 0) arr.splice(arr.length-1, 1)
+                        setUnits(arr)
+
+                        myBs()
+                    }}/>
+
+                    <Button title='Print' onPress={() => {
+                        console.log(perWeek)
+                        console.log(units)
                     }}/>
                 </View>
             </View>
             
             <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: height*.05}}>
-                <Text style={{fontSize: 20}}>{"Maintain dosing afterwards:  "}</Text>
+                <Text style={{fontSize: 20}}>{"Continue Highest Dosage:  "}</Text>
                 <Checkbox value={keepGoing}
                     onValueChange={setContinue}
                     justifyContent={'center'}
@@ -159,37 +221,13 @@ function EditFood({ navigation, route }) {
             </View>
 
             <View style={styles.bigFrequencyView}>
-
                 <View style={styles.frequencyView}>
-                    <Text style={styles.frequencyLabel}>Frequency</Text>
-                    <Picker selectedValue={selectedFrequency} onValueChange={(itemValue, itemIndex) => {
-                        setFrequency(itemValue)
-                    }} style={styles.picker}>
-
-                        <Picker.Item label="Daily" value="Daily" />
-                        <Picker.Item label="Weekly" value="Weekly" />  
-                        <Picker.Item label="Other" value="Other" />
-                    
-                    </Picker>
-
-                    <View style={{marginTop: -height*.02, flexDirection: 'row', alignItems: 'center', minHeight: height*.05}}>
-                        <Text style={{fontSize: 20}}>{"Specify Time:  "}</Text>
-                        <Checkbox value={showTime}
-                            onValueChange={(val) => setShowTime(val)}
-                            justifyContent={'center'}
-                        />
-                    </View>
-                    
-                    {showTime && <DateTimePicker value={new Date(time)} mode={'time'} onChange={(event, date) => setTime(date.getTime())}></DateTimePicker>}
-                </View>
-
-                {selectedFrequency != 'Daily'  && <View style={styles.frequencyView}>
                     <Text style={styles.frequencyLabel}>Specify Days</Text>
                     <View style={{marginTop: width*.13}}>
                         <CustomMultiPicker
                             options={days}
                             search={false}
-                            multiple={selectedFrequency!='Weekly'}
+                            multiple={true}
                             callback={(res)=>{
                                 setDays(res)
                             }}
@@ -203,10 +241,16 @@ function EditFood({ navigation, route }) {
                             returnValue={"value"}
                         />
                     </View>
+                </View>
 
-
-                </View>}
             </View>
+
+            <View style={{flexDirection: 'row', justifyContent: 'center', alignItems:'center'}}>
+                <Text style={{fontSize: 20}}>{"Specify Time: "}</Text>
+                <DateTimePicker value={new Date(time)} mode={'time'} onChange={(event, date) => setTime(date.getTime())}
+                style={{alignSelf:'center'}}/>
+            </View>
+            
 
             <View style={{marginBottom: height*.1, marginTop: height*.02}}>
                 <Button title={"Done"} style={{}} onPress={() => {

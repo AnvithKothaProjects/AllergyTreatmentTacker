@@ -11,10 +11,11 @@ function ImagePickerComponent ({navigation}) {
     const [image, setImage] = useState([])
     const [text, setText] = useState('Please add an image')
     const [bs, myBs] = useState()
+    const [loading, myLoading] = useState(false)
     
     const [str, setStr] = useState("f")
 
-    const {height, width} = useWindowDimensions();
+    const {height, width} = useWindowDimensions()
 
     const pickImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
@@ -50,7 +51,7 @@ function ImagePickerComponent ({navigation}) {
         else myBs('')
     }
 
-    return (
+    if (!loading) return (
         <View style={styles.container}>
             <Button title="Pick an image from camera roll" onPress={pickImage} />
 
@@ -64,6 +65,7 @@ function ImagePickerComponent ({navigation}) {
             </ScrollView>
             <Button title={'Submit'} onPress={async () => {
                 setText('Loading...')
+                myLoading(true)
                 const responseData = await callGoogleVision(image);
                 // console.log(responseData)
                 navigation.navigate('ShowPlan', {data: responseData, comingFromHelper: true})
@@ -78,7 +80,12 @@ function ImagePickerComponent ({navigation}) {
 
             <Text style={{textAlign: 'center', marginTop: 10, overflow: 'scroll', maxHeight: 200, maxWidth: width*.8}}>{text}</Text>
         </View>
-    );
+    ) 
+    return (
+        <View style={{alignItems: 'center'}}>
+            <Text style={{marginTop: height*.5}}>{"Loading..."}</Text>
+        </View>
+    )
 }
 
 export default ImagePickerComponent 

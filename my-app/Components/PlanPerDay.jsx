@@ -94,7 +94,7 @@ function PlanPerDay({ navigation, route }) {
             <ScrollView contentContainerStyle={{maxHeight: height*.5, alignItems: 'center', marginTop: height*.05}}>
                 {bigInd == -1 && <Text>Nothing for this date</Text>}
                 {bigInd != -1 && datePlan[bigInd][1].map((item, index) => (
-                    <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: height*.01 }}>
+                    <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: height*.01 }} key={index}>
                         <Text style={{marginRight: width*.01}}>{item[0]}</Text>
                         <Checkbox value={datePlan[bigInd][1][index][1]} onValueChange={() => {
                             let newArr = datePlan

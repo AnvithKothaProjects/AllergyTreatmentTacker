@@ -37,9 +37,9 @@ export default function ShoppingResults({ navigation, route }) {
                 {list.length == 0 && <Text>{"Specify some treatment foods!"}</Text>}
                 {list.length != 0 && <View>
                     {list.map((foodList, foodInd) => (
-                        <View>
+                        <View key={foodInd}>
                             {foodList.map((searchResult, searchInd) => (
-                                <View style={viewStyle(searchInd)} >
+                                <View style={viewStyle(searchInd)} key={searchInd}>
                                     {searchInd < 3 && <View>
                                         <Text style={{fontSize: 20}}>{updateStr(searchResult.title)}</Text>
 

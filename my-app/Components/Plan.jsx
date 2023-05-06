@@ -24,6 +24,7 @@ function Plan ({ navigation, route }) {
     const [bs, setBs] = useState("")
     const [addSection, changeAdd] = useState(-1)
     const [currText, changeText] = useState("")
+    const [loading, setLoading] = useState(false)
 
     const [date, setDate] = useState(new Date().getTime())
     
@@ -350,7 +351,7 @@ function Plan ({ navigation, route }) {
         await AsyncStorage.setItem("api", JSON.stringify(list))
     }
 
-    return (
+    if (!loading) return (
         <ScrollView style={styles.container}>
             {topics.map((elem, bigInd) => (
                 <View key={bigInd}>
@@ -413,6 +414,7 @@ function Plan ({ navigation, route }) {
             </View>
             <View style={{ marginBottom: height*.05 }}>
                 <Button title='Done' onPress={async () => {
+                    setLoading(true)
                     store()
                     await schedulePushNotification()
                     await makeDates()
@@ -420,14 +422,19 @@ function Plan ({ navigation, route }) {
                     navigation.navigate("Tabs")
                     
                 }}/>
+
+                <Button title='Straight to Calendar' onPress={async () => {
+                    navigation.navigate("Tabs")      
+                }}/>
             </View>
             
-            {/* <Button title='Print' onPress={() => {
-                console.log(new Date(date).getDate())
-            }}/> */}
-            
         </ScrollView>
-    );
+    )
+    return (
+        <View style={{alignItems: 'center'}}>
+            <Text style={{marginTop: height*.5}}>{"Loading..."}</Text>
+        </View>
+    )
 }
 
 export default Plan 

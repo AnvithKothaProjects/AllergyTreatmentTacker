@@ -16,17 +16,23 @@ export default function App() {
   const Tab = createMaterialBottomTabNavigator()
   // LogBox.ignoreLogs(["Warning: ..."]); // Ignore log notification by message
 
+  Stack.navigationOptions = ({navigation}) => {
+    return {
+      swipeled: false
+    }
+  }
+
   return (
     <NavigationContainer>
       <Stack.Navigator>
 
-        <Stack.Screen name="AddImages" options={{headerShown: false}} component={ImagePickerComponent}/>
+        <Stack.Screen name="AddImages" options={{headerShown: false, gestureEnabled: false}} component={ImagePickerComponent}/>
 
-        <Stack.Screen name="ShowPlan" component={Plan} options={{headerShown: false}} initialParams={{bigInd: -1, smallInd: -1, obj: null, firstTime: true, comingFromHelper: false, data: null }}/>
+        <Stack.Screen name="ShowPlan" component={Plan} options={{headerShown: false, gestureEnabled: false}} initialParams={{bigInd: -1, smallInd: -1, obj: null, firstTime: true, comingFromHelper: false, data: null }}/>
 
-        <Stack.Screen name="EditPlan" component={EditFood} options={{headerShown: false}}/>
+        <Stack.Screen name="EditPlan" component={EditFood} options={{headerShown: false, gestureEnabled: false}}/>
 
-        <Stack.Screen name="Tabs" component={Tabs} options={{headerShown: false}}/>
+        <Stack.Screen name="Tabs" component={Tabs} options={{headerShown: false, gestureEnabled: false}}/>
 
       </Stack.Navigator>
     </NavigationContainer>

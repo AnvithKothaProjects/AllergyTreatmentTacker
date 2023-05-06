@@ -14,6 +14,11 @@ export default function Tabs({ navigation, route }) {
     const theme = useTheme();
     theme.colors.secondaryContainer = ""
 
+    function hexToRGBA(hex, alpha) {
+        const [r, g, b] = hex.match(/\w\w/g).map((x) => parseInt(x, 16));
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
     return (
         <Tab.Navigator activeColor="#3f57e0"
         barStyle={{ backgroundColor: '#d8e8ed' }}>
@@ -22,10 +27,12 @@ export default function Tabs({ navigation, route }) {
                 component={PlanPerDay}
                 options={{
                     tabBarLabel: 'Calendar',
-                    tabBarColor: '#3f57e0',
-                    tabBarIcon: ({color}) => (
-                        <MaterialCommunityIcons name="calendar-check-outline" color={color} size={26}/>
-                    )
+                    tabBarIcon: ({focused, color}) => (
+                        <View style={{backgroundColor: focused ? hexToRGBA("3f57e0", 0.2) : "transparent", borderRadius: 10, padding: 2}}>
+                            <MaterialCommunityIcons name="calendar-check-outline" color={color} size={26}/>
+                        </View>
+                    ),
+                    activeColorTint: "#3f57e0"
                 }}
             />
 
@@ -34,8 +41,10 @@ export default function Tabs({ navigation, route }) {
                 component={ShoppingResults}
                 options={{
                     tabBarLabel: 'Shopping',
-                    tabBarIcon: ({color}) => (
-                        <MaterialCommunityIcons name="shopping-outline" color={color} size={26}/>
+                    tabBarIcon: ({focused, color}) => (
+                        <View style={{backgroundColor: focused ? hexToRGBA("3f57e0", 0.2) : "transparent", borderRadius: 10, padding: 2}}>
+                            <MaterialCommunityIcons name="shopping-outline" color={color} size={26}/>
+                        </View>
                     )
                 }}
             />

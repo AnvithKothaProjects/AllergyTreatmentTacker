@@ -10,7 +10,7 @@ import { NavigationContainer, StackActions, NavigationActions, route } from '@re
 import { createStackNavigator } from '@react-navigation/stack'  
 
 function EditFood({ navigation, route }) {
-    const { bigInd, smallInd, obj } = route.params
+    const { bigInd, smallInd, obj, data } = route.params
 
     const [food, setFood] = useState(obj.food)
     const [units, setUnits] = useState(obj.units)
@@ -205,10 +205,10 @@ function EditFood({ navigation, route }) {
                         myBs()
                     }}/>
 
-                    <Button title='Print' onPress={() => {
+                    {/* <Button title='Print' onPress={() => {
                         console.log(perWeek)
                         console.log(units)
-                    }}/>
+                    }}/> */}
                 </View>
             </View>
             
@@ -254,7 +254,7 @@ function EditFood({ navigation, route }) {
 
             <View style={{marginBottom: height*.1, marginTop: height*.02}}>
                 <Button title={"Done"} style={{}} onPress={() => {
-                    navigation.navigate("ShowPlan", {bigInd: bigInd, smallInd: smallInd, obj: makeObj(), firstTime: false})
+                    navigation.replace("ShowPlan", {bigInd: bigInd, smallInd: smallInd, obj: makeObj(), shouldRetrieve: false, data: data, comingFromHelper: true})
                 }}></Button>
             </View>
             

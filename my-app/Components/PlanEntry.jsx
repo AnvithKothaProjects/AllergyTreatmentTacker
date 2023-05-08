@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import Ionicons from '@expo/vector-icons/Ionicons';
 import {React} from 'react';
 
-function PlanEntry({ text, navigation, bigIndex, littleIndex, closeFunc, navFunc, obj }) {
+function PlanEntry({ text, navigation, bigIndex, littleIndex, closeFunc, navFunc, obj, data,  }) {
     const {height, width} = useWindowDimensions();
 
     const style = new StyleSheet.create({
@@ -23,7 +23,7 @@ function PlanEntry({ text, navigation, bigIndex, littleIndex, closeFunc, navFunc
         <View style={style.view}>
             <Text style={style.text}>{text + "  "}</Text>
             <Ionicons name='pencil' size={20} color='black' onPress={() => {
-                navFunc(bigIndex, littleIndex, obj)
+                navFunc(bigIndex, littleIndex, obj, data)
             }}/>
             <Ionicons name='close' size={20} color='black' onPress={() => {
                 closeFunc(bigIndex, littleIndex)

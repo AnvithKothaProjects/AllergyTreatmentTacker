@@ -6,6 +6,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Device from 'expo-device';
 import Checkbox from 'expo-checkbox';
 import CalendarPicker from 'react-native-calendar-picker';
+import BackgroundImg from './BackgroundImg';
 
 function PlanPerDay({ navigation, route }) {
     const [date, setDate] = useState(new Date());
@@ -58,7 +59,14 @@ function PlanPerDay({ navigation, route }) {
 
             if (numFalse == 0) str = "#4ca860" //green
             else if (numFalse == datePlan[index][1].length) str = "#a84c4c" //red
-            else str = "#ccb95c"
+            else {
+                let ratio = numFalse/datePlan[index][1].length
+
+                if (ratio > .75) str = "#965e50"
+                else if (ratio > .5) str = "#837154"
+                else if (ratio > .25) str = "#819358"
+                else str = "#678662"
+            }
         }
 
 
@@ -78,8 +86,8 @@ function PlanPerDay({ navigation, route }) {
     }
 
     return (
-        <View>
-            
+        <View style={{flex: 1, height: height}}>
+            <BackgroundImg></BackgroundImg>
             <View style={{justifyContent: 'center', alignItems: 'center', marginTop: height*.06}}>
                 <Text style={{fontSize: 20, marginBottom: height*.03}}>Choose Day</Text>
                 <CalendarPicker
@@ -91,11 +99,11 @@ function PlanPerDay({ navigation, route }) {
                     setIndex(checkList(datePlan, str))
                 }}/>
             </View>
-            <ScrollView contentContainerStyle={{maxHeight: height*.5, alignItems: 'center', marginTop: height*.05}}>
+            <ScrollView contentContainerStyle={{alignItems: 'center', marginTop: height*.05, }}>
                 {bigInd == -1 && <Text>Nothing for this date</Text>}
                 {bigInd != -1 && datePlan[bigInd][1].map((item, index) => (
-                    <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: height*.01 }} key={index}>
-                        <Text style={{marginRight: width*.01}}>{item[0]}</Text>
+                    <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: index != datePlan[bigInd][1].length-1 ? height*.03 : height*.1, }} key={index}>
+                        <Text style={{marginRight: width*.01, fontSize: 25,}}>{item[0]}</Text>
                         <Checkbox value={datePlan[bigInd][1][index][1]} onValueChange={() => {
                             let newArr = datePlan
                             newArr[bigInd][1][index][1] = !newArr[bigInd][1][index][1]
@@ -110,7 +118,26 @@ function PlanPerDay({ navigation, route }) {
                         }}/>
                     </View>
                 ))}
+                {/* <Button title='Print' onPress={() => {
+                    const func = async () => {
+                        let jsonValue = await AsyncStorage.getItem("latestPlan")
+                        console.log(JSON.parse(jsonValue).plan)
+                    }
+
+                    func()
+                }}></Button> */}
             </ScrollView>
+
+            <View style={{position: 'absolute', top: height*.7, right: width*.04}}>
+                <Ionicons name="list-circle" size={60}onPress={() => {
+                    navigation.replace("ShowPlan", {comingFromCalendar: true})
+                }}></Ionicons>
+                <Ionicons name="camera-reverse" size={60} onPress={() => {
+                    navigation.replace("AddImages", {comingFromCalendar: true})
+                }}></Ionicons>
+            </View>
+
+            
         </View>
         
     )

@@ -8,6 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
+import BackgroundImg from './BackgroundImg';
 
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
@@ -18,7 +19,7 @@ Notifications.setNotificationHandler({
 })
 
 function Plan ({ navigation, route }) {
-    const {bigInd, smallInd, obj, firstTime, data, comingFromHelper } = route.params
+    const {bigInd, smallInd, obj, shouldRetrieve, data, comingFromHelper, comingFromCalendar} = route.params
     const {height, width} = useWindowDimensions();
     const topics = ["Treatment Foods", "Maintenance Foods", "Recommended Foods", "Medicines"]
     const [bs, setBs] = useState("")
@@ -183,33 +184,31 @@ function Plan ({ navigation, route }) {
         myBs()
     }
 
-    const navFunc = (bigInd, smallInd, obj) => {
-        navigation.navigate("EditPlan", {bigInd: bigInd, smallInd: smallInd, obj: obj})
+    const navFunc = (bigInd, smallInd, obj, data) => {
+        navigation.replace("EditPlan", {bigInd: bigInd, smallInd: smallInd, obj: obj, data: data})
     }
 
     useEffect(() => {
-        if (bigInd != -1) {
-            let newInfo = info
-            newInfo[bigInd][smallInd] = obj
-            setInfo(newInfo)
-            myBs()
-        }
-
+        console.log(comingFromHelper + " " + shouldRetrieve)
+        console.log(data)
         const asyncFunc = async () => {
-            if (firstTime) {
+            if (shouldRetrieve && !comingFromHelper) {
                 await retrieve()
-            }
-
-            if (comingFromHelper) {
-                // console.log(data)
-                setInfo(data)
-                myBs()
             }
         }
 
         asyncFunc()
+        if (comingFromHelper) {
+            var newInfo = data
+            if (bigInd != -1) {
+                newInfo[bigInd][smallInd] = obj
+            }
+
+            setInfo(newInfo)
+            myBs()
+        }
         
-    }, [obj, bigInd, smallInd, firstTime, comingFromHelper, data])
+    }, [obj, bigInd, smallInd, shouldRetrieve, comingFromHelper, data])
 
     async function store() {
         try {
@@ -352,86 +351,96 @@ function Plan ({ navigation, route }) {
     }
 
     if (!loading) return (
-        <ScrollView style={styles.container}>
-            {topics.map((elem, bigInd) => (
-                <View key={bigInd}>
-                    <View style={styles.section}>
-                        <Text style={styles.header}>{topics[bigInd]}</Text>
+        <View style={{height: height}}>
+            <BackgroundImg></BackgroundImg>
+            <ScrollView style={styles.container}>
+                {topics.map((elem, bigInd) => (
+                    <View key={bigInd}>
+                        <View style={styles.section}>
+                            <Text style={styles.header}>{topics[bigInd]}</Text>
 
-                        {/* {info[bigInd].map((elem, smallInd) => (
-                           <PlanEntry key={smallInd} text={elem.food} closeFunc={closeFunc} bigIndex={bigInd} littleIndex={smallInd} navFunc={navFunc} obj={info[bigInd][smallInd]}/>
-                        ))} */}
+                            {/* {info[bigInd].map((elem, smallInd) => (
+                            <PlanEntry key={smallInd} text={elem.food} closeFunc={closeFunc} bigIndex={bigInd} littleIndex={smallInd} navFunc={navFunc} obj={info[bigInd][smallInd]}/>
+                            ))} */}
 
-                        {listOfTypes(info[bigInd]).map((foodType, typeInd) => (
-                            <View style={{marginLeft: width*.05, marginTop: getMarginTop(typeInd)}} key={typeInd}>
-                                <Text style={{fontSize: 25}}>{foodType}</Text>
-                                {info[bigInd].map((myFood, smallInd) => (
-                                    <View key={smallInd}>
-                                        {info[bigInd][smallInd].foodType == foodType && 
-                                        <PlanEntry key={smallInd} text={myFood.food} closeFunc={closeFunc} bigIndex={bigInd} littleIndex={smallInd} navFunc={navFunc} obj={info[bigInd][smallInd]}/>}
-                                    </View>
-                                ))}
-                            </View>
-                        ))}
+                            {listOfTypes(info[bigInd]).map((foodType, typeInd) => (
+                                <View style={{marginLeft: width*.05, marginTop: getMarginTop(typeInd)}} key={typeInd}>
+                                    <Text style={{fontSize: 25}}>{foodType}</Text>
+                                    {info[bigInd].map((myFood, smallInd) => (
+                                        <View key={smallInd}>
+                                            {info[bigInd][smallInd].foodType == foodType && 
+                                            <PlanEntry key={smallInd} text={myFood.food} closeFunc={closeFunc} bigIndex={bigInd} littleIndex={smallInd} navFunc={navFunc} obj={info[bigInd][smallInd]} data={info} />}
+                                        </View>
+                                    ))}
+                                </View>
+                            ))}
 
-                        {addSection == bigInd && <View style={[styles.inputView]}>
-                            <TextInput style={[styles.textInput, {marginRight: width*.02, paddingLeft: width*.02}]} id={"text"} placeholder="Add a new food" onChangeText={newText => {
-                                changeText(newText)
-                            }}/>
+                            {addSection == bigInd && <View style={[styles.inputView]}>
+                                <TextInput style={[styles.textInput, {marginRight: width*.02, paddingLeft: width*.02}]} id={"text"} placeholder="Add a new food" onChangeText={newText => {
+                                    changeText(newText)
+                                }}/>
 
-                            <Ionicons name='close-outline' size={30} color='black' onPress={() => {
-                                changeAdd(-1)
-                            }}/>
+                                <Ionicons name='close-outline' size={30} color='black' onPress={() => {
+                                    changeAdd(-1)
+                                }}/>
 
-                            <Ionicons name="checkmark-outline" size={30} color='black'onPress={() => {
-                                let newInfo = info
-                                newInfo[bigInd].push(new foodPlan())
-                                newInfo[bigInd][info[bigInd].length-1].food = currText
-                                newInfo[bigInd][info[bigInd].length-1].foodType = "Other"
-                                setInfo(newInfo)
-                                myBs()
-                                changeAdd(-1)
-                            }}/>
-                        </View>}
-                            
+                                <Ionicons name="checkmark-outline" size={30} color='black'onPress={() => {
+                                    let newInfo = info
+                                    newInfo[bigInd].push(new foodPlan())
+                                    newInfo[bigInd][info[bigInd].length-1].food = currText
+                                    newInfo[bigInd][info[bigInd].length-1].foodType = "Other"
+                                    setInfo(newInfo)
+                                    myBs()
+                                    changeAdd(-1)
+                                }}/>
+                            </View>}
+                                
+                        </View>
+
+                        <Ionicons name='add-circle' size={50} color='black' style={styles.plus} onPress={() => {
+                            changeAdd(bigInd)
+                        }}/>      
+                        {bigInd != 3 && <DashedLine dashLength={5} />}
                     </View>
-
-                    <Ionicons name='add-circle' size={50} color='black' style={styles.plus} onPress={() => {
-                        changeAdd(bigInd)
-                    }}/>      
-                    {bigInd != 3 && <DashedLine dashLength={5} />}
-                </View>
-                
-            ))}
-            
-            <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
-                <Text style={{fontSize: 20}}>Start Date:  </Text>
-                <DateTimePicker value={new Date(date)} mode={'date'} onChange={(event, date) => {
-                    setDate(date.getTime())
-                    console.log(new Date(date).getDate())
-                }} 
-                minimumDate={new Date()} maximumDate={new Date((new Date()).getTime() + 60*60*24*1000*30)}></DateTimePicker>
-            </View>
-            <View style={{ marginBottom: height*.05 }}>
-                <Button title='Done' onPress={async () => {
-                    setLoading(true)
-                    store()
-                    await schedulePushNotification()
-                    await makeDates()
-                    await callApi()
-                    navigation.navigate("Tabs")
                     
-                }}/>
+                ))}
+                
+                <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
+                    <Text style={{fontSize: 20}}>Start Date:  </Text>
+                    <DateTimePicker value={new Date(date)} mode={'date'} onChange={(event, date) => {
+                        setDate(date.getTime())
+                        console.log(new Date(date).getDate())
+                    }} 
+                    minimumDate={new Date()} maximumDate={new Date((new Date()).getTime() + 60*60*24*1000*30)}></DateTimePicker>
+                </View>
+                <View style={{ marginBottom: height*.05 }}>
+                    <Button title='Save Changes' onPress={async () => {
+                        setLoading(true)
+                        store()
+                        await schedulePushNotification()
+                        await makeDates()
+                        await callApi()
+                        navigation.replace("Tabs")
+                    }}/>
 
-                <Button title='Straight to Calendar' onPress={async () => {
-                    navigation.navigate("Tabs")      
-                }}/>
-            </View>
-            
-        </ScrollView>
+                    <Button title='Straight to Calendar' onPress={async () => {
+                        navigation.replace("Tabs")
+                    }}/>
+
+                    {/* <Button title='Print' onPress={() => {
+                        console.log(data)
+                    }}></Button> */}
+                </View>
+
+                {comingFromCalendar == true && <Ionicons name='close' size={50} style={{position: 'absolute', right: width*.02}} onPress={() => {
+                    navigation.replace('Tabs')
+                }}></Ionicons>}
+            </ScrollView>
+        </View>
     )
     return (
-        <View style={{alignItems: 'center'}}>
+        <View style={{alignItems: 'center', height: height}}>
+            <BackgroundImg></BackgroundImg>
             <Text style={{marginTop: height*.5}}>{"Loading..."}</Text>
         </View>
     )

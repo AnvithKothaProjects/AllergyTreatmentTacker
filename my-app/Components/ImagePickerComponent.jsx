@@ -8,6 +8,8 @@ import callGoogleVision from '../helper.js'
 import { NavigationContainer, StackActions, NavigationActions, route } from '@react-navigation/native'
 import Ionicons from '@expo/vector-icons/Ionicons';
 import BackgroundImg from './BackgroundImg'
+import myStyles from '../styles';
+import MyBtn from './MyBtn';
 
 function ImagePickerComponent ({navigation, route}) {
     const comingFromCalendar = useState(route.params.comingFromCalendar == true)
@@ -35,6 +37,7 @@ function ImagePickerComponent ({navigation, route}) {
             if (str == "f") setStr("");
             if (str == "") setStr("f")
         }
+        console.log("hi")
     };
 
     const styles = StyleSheet.create({
@@ -58,9 +61,8 @@ function ImagePickerComponent ({navigation, route}) {
 
     if (!loading) return (
             <View style={styles.container}>
-                <BackgroundImg/>
-
-                <Button title="Pick an image from camera roll" onPress={pickImage} />
+                
+                <MyBtn text={"Pick an image from camera roll"} press={pickImage} />
 
                 <ScrollView horizontal={true} style={{width: width*.9, 
                     maxHeight: 120, borderColor: '000000', borderWidth: 2, borderRadius: 10, padding: 5, maxWidth: width*.9,}} 
@@ -70,19 +72,21 @@ function ImagePickerComponent ({navigation, route}) {
                         <ImageDisplay picture={elem[0]} key={index} func={remove} index={index}></ImageDisplay>
                     ))}
                 </ScrollView>
-                <Button title={'Submit'} onPress={async () => {
+
+                <MyBtn text={"Submit"} press={async () => {
                     setText('Loading...')
                     myLoading(true)
                     const responseData = await callGoogleVision(image);
                     // console.log(responseData)
                     navigation.replace('ShowPlan', {data: responseData, comingFromHelper: true, comingFromCalendar: comingFromCalendar[0] == true, shouldRetrieve: false})
-                }}></Button>
+                }}/>
+                
                 <Button title={"Straight to screen"} onPress={() => {
                     navigation.replace('ShowPlan')
                 }}/>
-                <Button title={"Erase Storage"} onPress={() => {
+                {/* <Button title={"Erase Storage"} onPress={() => {
                     AsyncStorage.clear()
-                }}/>
+                }}/> */}
                 
 
                 <Text style={{textAlign: 'center', marginTop: 10, overflow: 'scroll', maxHeight: 200, maxWidth: width*.8}}>{text}</Text>

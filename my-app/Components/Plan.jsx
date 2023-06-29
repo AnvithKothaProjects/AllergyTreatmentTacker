@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Button, Image, View, Text, useWindowDimensions, ScrollView, StyleSheet, TextInput } from 'react-native'
+import { Button, Image, View, Text, useWindowDimensions, ScrollView, StyleSheet, TextInput, TouchableOpacity } from 'react-native'
 import PlanEntry from './PlanEntry'
 import DashedLine from 'react-native-dashed-line';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -9,6 +9,10 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import BackgroundImg from './BackgroundImg';
+import myStyles from '../styles';
+import colors from '../colors';
+import { FlatList, GestureHandlerRootView } from 'react-native-gesture-handler';
+import * as Haptics from 'expo-haptics';
 
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
@@ -145,9 +149,6 @@ function Plan ({ navigation, route }) {
             marginLeft: width*.02,
             marginTop: height*.08,
         },
-        header: {
-            fontSize: 27,
-        },
         section: {
             marginLeft: width*.06,
             marginTop: height*.02,
@@ -158,9 +159,9 @@ function Plan ({ navigation, route }) {
         },
         textInput: {
             marginLeft: width*.06,
-            width: width*.6,
+            width: width*.6, 
             height: 40,
-            borderWidth: 1,
+            borderWidth: 2,
             borderRadius: 10,
         },
         inputView: {
@@ -182,6 +183,7 @@ function Plan ({ navigation, route }) {
         setInfo(newInfo)
 
         myBs()
+        setTimeout(() => myBs(), 100);
     }
 
     const navFunc = (bigInd, smallInd, obj, data) => {
@@ -351,40 +353,48 @@ function Plan ({ navigation, route }) {
     }
 
     if (!loading) return (
+        
         <View style={{height: height}}>
-            <BackgroundImg></BackgroundImg>
             <ScrollView style={styles.container}>
+                <Text style={[myStyles.topHeading, myStyles.darkBlue, {alignSelf: 'center', marginBottom: height*.005}]}>{"Your Plan"}</Text>
+
                 {topics.map((elem, bigInd) => (
                     <View key={bigInd}>
                         <View style={styles.section}>
-                            <Text style={styles.header}>{topics[bigInd]}</Text>
+                            <Text style={[myStyles.mainHeader, myStyles.lightBlue]}>{topics[bigInd]}</Text>
 
                             {/* {info[bigInd].map((elem, smallInd) => (
                             <PlanEntry key={smallInd} text={elem.food} closeFunc={closeFunc} bigIndex={bigInd} littleIndex={smallInd} navFunc={navFunc} obj={info[bigInd][smallInd]}/>
                             ))} */}
 
                             {listOfTypes(info[bigInd]).map((foodType, typeInd) => (
-                                <View style={{marginLeft: width*.05, marginTop: getMarginTop(typeInd)}} key={typeInd}>
-                                    <Text style={{fontSize: 25}}>{foodType}</Text>
+                                <View style={{marginLeft: width*.1, marginTop: getMarginTop(typeInd), marginBottom: height*.01,}} key={typeInd}>
+                                    <Text style={[myStyles.subHeader, myStyles.lightBlue]}>{foodType}</Text>
                                     {info[bigInd].map((myFood, smallInd) => (
-                                        <View key={smallInd}>
-                                            {info[bigInd][smallInd].foodType == foodType && 
-                                            <PlanEntry key={smallInd} text={myFood.food} closeFunc={closeFunc} bigIndex={bigInd} littleIndex={smallInd} navFunc={navFunc} obj={info[bigInd][smallInd]} data={info} />}
+                                        <View key={smallInd} style={{alignItems: 'baseline'}}>
+                                            <GestureHandlerRootView style={{marginLeft: width*.05}}>
+                                                {info[bigInd][smallInd].foodType == foodType && 
+                                                <PlanEntry key={smallInd} text={myFood.food} closeFunc={closeFunc} bigIndex={bigInd}
+                                                littleIndex={smallInd} navFunc={navFunc} obj={info[bigInd][smallInd]} data={info} />}
+                                            </GestureHandlerRootView>
+                                            
+                                            
                                         </View>
+                                        
                                     ))}
                                 </View>
                             ))}
 
-                            {addSection == bigInd && <View style={[styles.inputView]}>
-                                <TextInput style={[styles.textInput, {marginRight: width*.02, paddingLeft: width*.02}]} id={"text"} placeholder="Add a new food" onChangeText={newText => {
+                            {addSection == bigInd && <View style={[styles.inputView, {marginLeft: width*.02}]}>
+                                <TextInput style={[styles.textInput, {marginRight: width*.02, paddingLeft: width*.02, borderColor: colors.darkBlue}]} id={"text"} placeholder="Add a new food" onChangeText={newText => {
                                     changeText(newText)
                                 }}/>
 
-                                <Ionicons name='close-outline' size={30} color='black' onPress={() => {
+                                <Ionicons name='close' size={35} color={colors.darkBlue} onPress={() => {
                                     changeAdd(-1)
                                 }}/>
 
-                                <Ionicons name="checkmark-outline" size={30} color='black'onPress={() => {
+                                <Ionicons name="checkmark-sharp" size={35} color={colors.darkBlue} onPress={() => {
                                     let newInfo = info
                                     newInfo[bigInd].push(new foodPlan())
                                     newInfo[bigInd][info[bigInd].length-1].food = currText
@@ -397,35 +407,43 @@ function Plan ({ navigation, route }) {
                                 
                         </View>
 
-                        <Ionicons name='add-circle' size={50} color='black' style={styles.plus} onPress={() => {
+                        <Ionicons name='add-circle' size={50} color={colors.darkBlue} style={styles.plus} onPress={() => {
                             changeAdd(bigInd)
                         }}/>      
-                        {bigInd != 3 && <DashedLine dashLength={5} />}
+                        {bigInd != 3 && <DashedLine dashLength={5} dashColor={colors.lightBlue}/>}
                     </View>
                     
                 ))}
                 
                 <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
-                    <Text style={{fontSize: 20}}>Start Date:  </Text>
+                    <Text style={{fontSize: 20, color: colors.darkBlue}}>Start Date:  </Text>
                     <DateTimePicker value={new Date(date)} mode={'date'} onChange={(event, date) => {
                         setDate(date.getTime())
                         console.log(new Date(date).getDate())
                     }} 
                     minimumDate={new Date()} maximumDate={new Date((new Date()).getTime() + 60*60*24*1000*30)}></DateTimePicker>
                 </View>
+
                 <View style={{ marginBottom: height*.05 }}>
-                    <Button title='Save Changes' onPress={async () => {
+
+                    <TouchableOpacity style={{backgroundColor: colors.darkBlue, height: height*.05, width: width*.2, 
+                    alignSelf: 'center', borderRadius: 10, marginTop: height*.02, shadowColor: colors.gray, alignItems: 'center', justifyContent: 'center',
+                    shadowOpacity: 0.4, elevation: 6, shadowRadius: 5, shadowOffset : { width: 0, height: height*.01},}} onPress={async () => {
                         setLoading(true)
                         store()
                         await schedulePushNotification()
                         await makeDates()
                         await callApi()
                         navigation.replace("Tabs")
-                    }}/>
+                    }}>
 
-                    <Button title='Straight to Calendar' onPress={async () => {
+                        <Text style={{color: 'white', fontSize: 30,}}>{'OK'}</Text>
+
+                    </TouchableOpacity>
+
+                    {/* <Button title='Straight to Calendar' onPress={async () => {
                         navigation.replace("Tabs")
-                    }}/>
+                    }}/> */}
 
                     {/* <Button title='Print' onPress={() => {
                         console.log(data)
@@ -437,10 +455,10 @@ function Plan ({ navigation, route }) {
                 }}></Ionicons>}
             </ScrollView>
         </View>
+        
     )
     return (
         <View style={{alignItems: 'center', height: height}}>
-            <BackgroundImg></BackgroundImg>
             <Text style={{marginTop: height*.5}}>{"Loading..."}</Text>
         </View>
     )

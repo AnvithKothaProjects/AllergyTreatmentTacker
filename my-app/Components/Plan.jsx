@@ -13,6 +13,7 @@ import myStyles from '../styles';
 import colors from '../colors';
 import { FlatList, GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as Haptics from 'expo-haptics';
+import { DraxProvider, DraxView, DraxScrollView } from 'react-native-drax';
 
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
@@ -354,8 +355,8 @@ function Plan ({ navigation, route }) {
 
     if (!loading) return (
         
-        <View style={{height: height}}>
-            <ScrollView style={styles.container}>
+        <DraxProvider style={{height: height}}>
+            <DraxScrollView style={styles.container}>
                 <Text style={[myStyles.topHeading, myStyles.darkBlue, {alignSelf: 'center', marginBottom: height*.005}]}>{"Your Plan"}</Text>
 
                 {topics.map((elem, bigInd) => (
@@ -372,13 +373,17 @@ function Plan ({ navigation, route }) {
                                     <Text style={[myStyles.subHeader, myStyles.lightBlue]}>{foodType}</Text>
                                     {info[bigInd].map((myFood, smallInd) => (
                                         <View key={smallInd} style={{alignItems: 'baseline'}}>
+
                                             <GestureHandlerRootView style={{marginLeft: width*.05}}>
-                                                {info[bigInd][smallInd].foodType == foodType && 
-                                                <PlanEntry key={smallInd} text={myFood.food} closeFunc={closeFunc} bigIndex={bigInd}
-                                                littleIndex={smallInd} navFunc={navFunc} obj={info[bigInd][smallInd]} data={info} />}
+                                                <DraxView draggingStyle={{}} dragReleasedStyle={{}} 
+                                                hoverDraggingStyle={{}} dragPayload={'R'} longPressDelay={250} style={{}}>
+                                                    {info[bigInd][smallInd].foodType == foodType && 
+                                                    <PlanEntry key={smallInd} text={myFood.food} closeFunc={closeFunc} bigIndex={bigInd}
+                                                    littleIndex={smallInd} navFunc={navFunc} obj={info[bigInd][smallInd]} data={info} />}
+                                                </DraxView>
                                             </GestureHandlerRootView>
                                             
-                                            
+                                        
                                         </View>
                                         
                                     ))}
@@ -453,8 +458,8 @@ function Plan ({ navigation, route }) {
                 {comingFromCalendar == true && <Ionicons name='close' size={50} style={{position: 'absolute', right: width*.02}} onPress={() => {
                     navigation.replace('Tabs')
                 }}></Ionicons>}
-            </ScrollView>
-        </View>
+            </DraxScrollView>
+        </DraxProvider>
         
     )
     return (

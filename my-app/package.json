@@ -30,6 +30,7 @@
     "react-native": "0.70.5",
     "react-native-calendar-picker": "^7.1.4",
     "react-native-dashed-line": "^1.1.0",
+    "react-native-drax": "^0.10.3",
     "react-native-gesture-handler": "^2.9.0",
     "react-native-multiple-select-list": "^1.0.4",
     "react-native-paper": "^5.7.2",

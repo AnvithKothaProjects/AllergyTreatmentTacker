@@ -11,6 +11,7 @@ import { createStackNavigator } from '@react-navigation/stack'
 import colors from '../colors';
 import myStyles from '../styles'
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import { DraxProvider, DraxView, DraxScrollView } from 'react-native-drax';
 
 function EditFood({ navigation, route }) {
     const { bigInd, smallInd, obj, data, fromCalendar } = route.params
@@ -268,8 +269,8 @@ function EditFood({ navigation, route }) {
             
         // </ScrollView>
         
-        <View style={{height: height}}>
-            <ScrollView style={{marginTop: height*.08, marginLeft: width*.03, marginRight: width*.03}}>
+        <DraxProvider style={{height: height}}>
+            <DraxScrollView style={{marginTop: height*.08, marginLeft: width*.03, marginRight: width*.03}}>
                 <View style={[myStyles.bigView, {marginBottom: height*.015}]}>
                     <View style={{marginLeft: width*.03}}>
 
@@ -406,8 +407,8 @@ function EditFood({ navigation, route }) {
                     <Text style={[myStyles.white, myStyles.text]}>{'Save'}</Text>
             
                 </TouchableOpacity>
-            </ScrollView>
-        </View>
+            </DraxScrollView>
+        </DraxProvider>
         
     )
 }

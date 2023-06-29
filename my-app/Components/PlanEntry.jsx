@@ -75,8 +75,8 @@ function PlanEntry({ text, navigation, bigIndex, littleIndex, closeFunc, navFunc
             friction={1.5}
             ref={swipeableRef}
         > 
-            <View style={{backgroundColor: '#f2f2f2',}}>
-                <View style={[style.view, {alignItems: 'center'}]}>
+            <View style={{backgroundColor: '#f2f2f2', borderRadius: 5, }}>
+                <View style={[style.view, {alignItems: 'center', padding: -height*.001}]}>
                     <Ionicons name='caret-forward-outline' size={17} color={colors.gray} style={{marginRight: 5}}/>
                     <Text style={[myStyles.text, myStyles.gray]}>{text}</Text>
                 </View>

@@ -1,4 +1,4 @@
-import { Button, Image, View, Text, useWindowDimensions, ScrollView, StyleSheet } from 'react-native'
+import { Button, Image, View, Text, useWindowDimensions, ScrollView, StyleSheet, Touchable, TouchableOpacity } from 'react-native'
 import { useState, useEffect, useRef } from 'react'
 import Ionicons from '@expo/vector-icons/Ionicons';
 import {React} from 'react';
@@ -34,7 +34,7 @@ function PlanEntry({ text, navigation, bigIndex, littleIndex, closeFunc, navFunc
 
     const left = () => {
         return (
-            <View style={{backgroundColor: '#e65353', flex: 1, borderTopLeftRadius: 10, borderBottomLeftRadius: 10,
+            <View style={{backgroundColor: '#e65353', flex: 1, borderRadius: 10,
             alignItems: 'center', flexDirection: 'row'}}>
                 <Ionicons name='trash-outline' size={29} color={colors.white} style={{marginLeft: 10}}/>                
             </View>
@@ -43,9 +43,9 @@ function PlanEntry({ text, navigation, bigIndex, littleIndex, closeFunc, navFunc
 
     const right = () => {
         return (
-            <View style={{backgroundColor: colors.darkBlue, flex: 1, borderTopRightRadius: 10, borderBottomRightRadius: 10,
+            <View style={{backgroundColor: '#e65353', flex: 1, borderRadius: 10,
             alignItems: 'center', flexDirection: 'row-reverse'}}>
-                <Ionicons name='pencil' size={29} color={colors.white} style={{marginRight: 10}}/>
+                <Ionicons name='trash-outline' size={29} color={colors.white} style={{marginRight: 10}}/>
             </View>
         )
     }
@@ -60,27 +60,22 @@ function PlanEntry({ text, navigation, bigIndex, littleIndex, closeFunc, navFunc
             renderRightActions={right}
             onSwipeableOpen={(direction) => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
-                if (direction == "left") {
-                    try {
-                        closeFunc(bigIndex, littleIndex)
-                        closeSwipeable()
-                    } catch (TypeError) {
-                        console.log("Error")
-                    }
-                    
-                } else {
-                    navFunc(bigIndex, littleIndex, obj, data)
-                }
+                try {
+                    closeFunc(bigIndex, littleIndex)
+                    closeSwipeable()
+                } catch (TypeError) {
+                    console.log("Error")
+                } 
             }}
             friction={1.5}
             ref={swipeableRef}
         > 
-            <View style={{backgroundColor: '#f2f2f2', borderRadius: 5, }}>
+            <TouchableOpacity style={{backgroundColor: '#f2f2f2', borderRadius: 5, }} onPress={() => navFunc(bigIndex, littleIndex, obj, data)}>
                 <View style={[style.view, {alignItems: 'center', padding: -height*.001}]}>
-                    <Ionicons name='caret-forward-outline' size={17} color={colors.gray} style={{marginRight: 5}}/>
+                    <Ionicons name='ellipse' size={10} color={colors.gray} style={{marginRight: 10}}/>
                     <Text style={[myStyles.text, myStyles.gray]}>{text}</Text>
                 </View>
-            </View>
+            </TouchableOpacity>
             
         </Swipeable>
     )

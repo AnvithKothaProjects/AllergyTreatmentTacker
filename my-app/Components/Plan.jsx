@@ -8,7 +8,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
-import BackgroundImg from './BackgroundImg';
 import myStyles from '../styles';
 import colors from '../colors';
 import { FlatList, GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -31,6 +30,7 @@ function Plan ({ navigation, route }) {
     const [addSection, changeAdd] = useState(-1)
     const [currText, changeText] = useState("")
     const [loading, setLoading] = useState(false)
+    const [keyShift, setShift] = useState(0)
 
     const [date, setDate] = useState(new Date().getTime())
     
@@ -182,9 +182,8 @@ function Plan ({ navigation, route }) {
         let newInfo = info
         newInfo[bigIndex].splice(littleIndex,1)
         setInfo(newInfo)
-
+        setShift(keyShift+1)
         myBs()
-        setTimeout(() => myBs(), 100);
     }
 
     const navFunc = (bigInd, smallInd, obj, data) => {
@@ -315,7 +314,7 @@ function Plan ({ navigation, route }) {
             }
         }
 
-        return list
+        return list.sort()
     }
 
     async function retrieve() {
@@ -354,9 +353,8 @@ function Plan ({ navigation, route }) {
     }
 
     if (!loading) return (
-        
         <DraxProvider style={{height: height}}>
-            <DraxScrollView style={styles.container}>
+            <DraxScrollView style={[styles.container, {width: width*.98}]} scrollIndicatorInsets={{ right: 1 }}>
                 <Text style={[myStyles.topHeading, myStyles.darkBlue, {alignSelf: 'center', marginBottom: height*.005}]}>{"Your Plan"}</Text>
 
                 {topics.map((elem, bigInd) => (
@@ -367,28 +365,57 @@ function Plan ({ navigation, route }) {
                             {/* {info[bigInd].map((elem, smallInd) => (
                             <PlanEntry key={smallInd} text={elem.food} closeFunc={closeFunc} bigIndex={bigInd} littleIndex={smallInd} navFunc={navFunc} obj={info[bigInd][smallInd]}/>
                             ))} */}
-
-                            {listOfTypes(info[bigInd]).map((foodType, typeInd) => (
-                                <View style={{marginLeft: width*.1, marginTop: getMarginTop(typeInd), marginBottom: height*.01,}} key={typeInd}>
-                                    <Text style={[myStyles.subHeader, myStyles.lightBlue]}>{foodType}</Text>
-                                    {info[bigInd].map((myFood, smallInd) => (
-                                        <View key={smallInd} style={{alignItems: 'baseline'}}>
-
-                                            <GestureHandlerRootView style={{marginLeft: width*.05}}>
-                                                <DraxView draggingStyle={{}} dragReleasedStyle={{}} 
-                                                hoverDraggingStyle={{}} dragPayload={'R'} longPressDelay={250} style={{}}>
-                                                    {info[bigInd][smallInd].foodType == foodType && 
-                                                    <PlanEntry key={smallInd} text={myFood.food} closeFunc={closeFunc} bigIndex={bigInd}
-                                                    littleIndex={smallInd} navFunc={navFunc} obj={info[bigInd][smallInd]} data={info} />}
-                                                </DraxView>
-                                            </GestureHandlerRootView>
-                                            
+                            <View style={{alignItems: 'baseline'}}>
+                                {listOfTypes(info[bigInd]).map((foodType, typeInd) => (
+                                    <DraxView style={{marginLeft: width*.08, marginTop: getMarginTop(typeInd), marginBottom: height*.01, 
+                                    paddingHorizontal: width*.02, paddingBottom: height*.005, borderWidth: 1, borderColor: 'transparent'}} 
+                                    key={typeInd+keyShift} receivingStyle={myStyles.whileHover} renderContent={({viewState}) => {
                                         
-                                        </View>
-                                        
-                                    ))}
-                                </View>
-                            ))}
+                                        const receivingDrag = viewState && viewState.receivingDrag;
+                                        const payload = receivingDrag && receivingDrag.payload;
+
+                                        return (
+                                            <>
+                                                <Text style={[myStyles.subHeader, myStyles.lightBlue]}>{foodType}</Text>
+                                                {info[bigInd].map((myFood, smallInd) => (
+                                                    <View key={smallInd} style={{alignItems: 'baseline'}}>
+
+                                                        <GestureHandlerRootView style={{marginLeft: width*.05}}>
+                                                            <DraxView draggingStyle={myStyles.transparentDrag} payload={[bigInd,smallInd]} longPressDelay={300} 
+                                                            hoverDraggingStyle={myStyles.whileHover} dragReleasedStyle={myStyles.transparentDrag} key={[bigInd,smallInd]}
+                                                            isReceptive={false}>
+                                                                {info[bigInd][smallInd].foodType == foodType && 
+                                                                <PlanEntry key={smallInd} text={myFood.food} closeFunc={closeFunc} bigIndex={bigInd}
+                                                                littleIndex={smallInd} navFunc={navFunc} obj={info[bigInd][smallInd]} data={info}/>}
+                                                            </DraxView>
+                                                        </GestureHandlerRootView>
+                                                        
+                                                    
+                                                    </View>
+                                                ))}
+                                            </>
+                                        )
+                                    }} onReceiveDragDrop={(event) => {
+                                        let list = event.dragged.payload
+                                        let myInfo = info
+
+                                        let myObj = myInfo[list[0]][list[1]]
+
+                                        if (myObj.foodType == foodType && list[0] == bigInd) return
+
+                                        myInfo[list[0]].splice(list[1],1)
+
+                                        myObj.foodType = foodType
+                                        console.log(myObj.foodType)
+                                        myInfo[bigInd].push(myObj)
+
+                                        setInfo(myInfo)
+                                        setShift(keyShift+1)
+                                        myBs()
+                                        return 1
+                                    }} isParent={true}/>
+                                ))}
+                            </View>
 
                             {addSection == bigInd && <View style={[styles.inputView, {marginLeft: width*.02}]}>
                                 <TextInput style={[styles.textInput, {marginRight: width*.02, paddingLeft: width*.02, borderColor: colors.darkBlue}]} id={"text"} placeholder="Add a new food" onChangeText={newText => {
@@ -405,6 +432,7 @@ function Plan ({ navigation, route }) {
                                     newInfo[bigInd][info[bigInd].length-1].food = currText
                                     newInfo[bigInd][info[bigInd].length-1].foodType = "Other"
                                     setInfo(newInfo)
+                                    setShift(keyShift+1)
                                     myBs()
                                     changeAdd(-1)
                                 }}/>
@@ -445,6 +473,7 @@ function Plan ({ navigation, route }) {
                         <Text style={{color: 'white', fontSize: 30,}}>{'OK'}</Text>
 
                     </TouchableOpacity>
+                    {/* <Button onPress={() => navigation.replace("Tabs")} title='Straight'></Button> */}
 
                     {/* <Button title='Straight to Calendar' onPress={async () => {
                         navigation.replace("Tabs")
